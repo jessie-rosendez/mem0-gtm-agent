@@ -4,19 +4,46 @@ An agentic GTM pipeline that hunts developer pain signals across GitHub, Stack O
 
 Built for [Mem0](https://mem0.ai), an AI memory infrastructure platform that gives AI agents persistent, isolated memory via a single API.
 
-## What it does
+**Live web demo:** [mem0-gtm-web.vercel.app](https://mem0-gtm-web.vercel.app) — run the agent in a browser, see results in real time.
 
-1. **Signal Collection** — Scrapes 4 sources for developers actively fighting stateless-agent problems (custom memory buffers, FAISS DIY stores, session state issues)
-2. **Lead Scoring** — Claude evaluates each signal on pain intensity, product fit, and buyer stage (weighted composite score)
-3. **Developer Profiling** — Enriches GitHub leads with profile data; filters out anyone already using Mem0
-4. **Outreach Generation** — Writes 3 channel-specific messages per lead (LinkedIn note, cold email, GitHub comment) citing the lead's exact pain point
-5. **Report** — Saves ranked lead table + full outreach to `output/`
+---
 
-## Sample output
+## Sample Output
 
-From a single run: **136 signals → 46 qualified leads (score ≥ 6.5) → 10 with full outreach packages**
+> From a single run: **136 signals collected → 46 qualified leads (score ≥ 6.5) → 10 with full outreach packages**
 
-See [`output/report.md`](output/report.md) for the full ranked lead table and top 5 lead profiles with generated outreach.
+Full results: [`output/report.md`](output/report.md) · [`output/leads.json`](output/leads.json)
+
+### Ranked lead table (top 5)
+
+| # | Source | Handle | Framework | Pain | Fit | Stage | Score |
+|---|--------|--------|-----------|------|-----|-------|-------|
+| 1 | stackoverflow | Sergio G | LangChain | 9 | 10 | 9 | **9.2** |
+| 2 | hackernews | yashsolanky | unknown | 9 | 10 | 8 | **9.2** |
+| 3 | github | GitHpriyanshu23 | FastAPI | 9 | 10 | 8 | **9.1** |
+| 4 | github | doobidoo | LangGraph | 10 | 9 | 8 | **9.1** |
+| 5 | hackernews | BERTmackliin | unknown | 10 | 9 | 8 | **9.1** |
+
+### Generated outreach — Lead #1 (Sergio G, score 9.2)
+
+**LinkedIn note**
+> Saw your FastAPI + LangChain scaling question - the per-user memory mixing issue is exactly what we built Mem0 to solve. We handle persistent, isolated memory for each user session without the agent instantiation headaches. Has a free tier if you want to test it.
+
+**Cold email** · *Subject: Re: Your LangChain agent scaling question*
+> Saw your question about per-user memory mixing in your FastAPI LangChain setup. This exact problem - session data bleeding across users - is why we built Mem0. Instead of managing memory state in your agent initialization, Mem0 gives each user isolated, persistent memory via a simple API call. You can test it free with your existing FastAPI setup. Would save you from having to architect the per-user memory isolation yourself.
+
+**GitHub comment**
+> The per-user memory mixing you're hitting is a common LangChain scaling issue. Mem0 handles isolated user sessions without requiring separate agent instances - each user gets their own memory space via API calls. Free tier available for testing with your FastAPI setup. Might be cleaner than managing session state in your agent architecture.
+
+---
+
+## How it works
+
+1. **Signal Collection** — Parallel scrape across GitHub, Stack Overflow, HN, and HN Who's Hiring for developers actively fighting stateless-agent problems
+2. **Lead Scoring** — Claude evaluates each signal on pain intensity (1-10), product fit (1-10), and buyer stage (1-10); computes a weighted composite score
+3. **Developer Profiling** — For GitHub leads above threshold: pulls repo details, bio, stack context; filters anyone already using Mem0
+4. **Outreach Generation** — Claude writes 3 channel-specific messages per lead (LinkedIn, email, GitHub comment) referencing the lead's exact code or post
+5. **Report** — Saves ranked table + full profiles to `output/report.md` and `output/leads.json`
 
 ## Architecture
 
